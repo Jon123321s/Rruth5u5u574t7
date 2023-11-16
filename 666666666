@@ -1,0 +1,77 @@
+#include <iostream>
+#include <fstream>
+#include <map>
+
+int main() {
+    std::map<std::string, std::string> dictionary;
+    std::string english, russian;
+
+    std::ifstream inputFile("slovar.txt"); // Проверяем наличие файла словаря
+    if (inputFile.is_open()) {
+        std::string line;
+        while (std::getline(inputFile, line)) {
+            size_t separatorPosition = line.find(':');
+            if (separatorPosition != std::string::npos) {
+                english = line.substr(0, separatorPosition);
+                russian = line.substr(separatorPosition + 1);
+                dictionary.insert(std::make_pair(english, russian)); // Добавляем слово в словарь
+            }
+        }
+        inputFile.close();
+    }
+
+    int choice;
+    do {
+        std::cout << "Выберите действие:\n";
+        std::cout << "1. Ввести слово на английском и получить перевод на русском\n";
+        std::cout << "2. Ввести слово на русском и получить перевод на английском\n";
+        std::cout << "3. Выход\n";
+        std::cout << "Ваш выбор: ";
+        std::cin >> choice;
+
+        switch (choice) {
+            case 1: {
+                std::cout << "Введите слово на английском: ";
+                std::cin >> english;
+
+                auto iter = dictionary.find(english);
+                if (iter != dictionary.end()) {
+                    std::cout << "Перевод на русском: " << iter->second << std::endl;
+                } else {
+                    std::cout << "Слово не найдено в словаре" << std::endl;
+                }
+                break;
+            }
+            case 2: {
+                std::cout << "Введите слово на русском: ";
+                std::cin >> russian;
+
+                bool found = false;
+                for (const auto& pair : dictionary) {
+                    if (pair.second == russian) {
+                        std::cout << "Перевод на английском: " << pair.first << std::endl;
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    std::cout << "Слово не найдено в словаре" << std::endl;
+                }
+                break;
+            }
+            case 3:
+                break;
+            default:
+                std::cout << "Некорректный выбор. Попробуйте снова." << std::endl;
+                break;
+        }
+    } while (choice != 3);
+
+    std::ofstream outputFile("slovar.txt"); // Открываем файл словаря для записи
+    for (const auto& pair : dictionary) {
+        outputFile << pair.first << ":" << pair.second << std::endl; // Записываем слова в файл
+    }
+    outputFile.close();
+
+    return 0;
+}
